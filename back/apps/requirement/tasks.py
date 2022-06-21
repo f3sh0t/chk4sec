@@ -41,7 +41,7 @@ def generate_pdf(uuid: str) -> None:
             categories.append(
                 {
                     "category": category,
-                    "requirements": Requirement.objects.filter(id__in=requirements_ids),
+                    "requirements": Requirement.objects.filter(categories__in=[category]),
                     "selected_ids": requirements_ids,
                 }
             )
