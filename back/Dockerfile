@@ -20,7 +20,6 @@ RUN pip install poetry &&\
 ADD poetry.lock .
 ADD pyproject.toml .
 RUN poetry install --no-dev
-# RUN pip install logging
 
 ADD . ${WORK_DIR}
 

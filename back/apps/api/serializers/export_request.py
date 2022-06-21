@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+
 from apps.requirement.models import Category, Requirement, ExportRequest
 
 __all__ = ["CreateRequestExportSerializer", "ExportRequestRetrieveSerializer"]
@@ -9,7 +10,8 @@ __all__ = ["CreateRequestExportSerializer", "ExportRequestRetrieveSerializer"]
 class CreateExportOneCategorySerializer(serializers.Serializer):
     category_id = serializers.PrimaryKeyRelatedField(required=True, queryset=Category.objects.all())
     requirements_ids = serializers.PrimaryKeyRelatedField(many=True, queryset=Requirement.objects.all())
-    
+
+
 class CreateRequestExportSerializer(serializers.Serializer):
     data = CreateExportOneCategorySerializer(many=True, required=True)
     language = serializers.ChoiceField(
@@ -28,12 +30,14 @@ class CreateRequestExportSerializer(serializers.Serializer):
             for requirement in reqs:
                 requirements_ids.append(requirement.pk)
             default_data.append({"category_id": category.id, "requirements_ids": requirements_ids})
+
         actual_data = []
         for cat_data in validated_data["data"]:
             requirements_ids = []
             for requirement in cat_data["requirements_ids"]:
                 requirements_ids.append(requirement.pk)
             actual_data.append({"category_id": cat_data["category_id"].id, "requirements_ids": requirements_ids})
+
         if default_data:
             for actual_req in actual_data:
                 for default_req in default_data:
@@ -48,6 +52,7 @@ class CreateRequestExportSerializer(serializers.Serializer):
                         count += 1
                 if count == 0:
                     actual_data.insert(0, default_req)
+
         return ExportRequest.objects.create(
             status=ExportRequest.STATUS.CREATED, data=actual_data, language=validated_data["language"]
         )

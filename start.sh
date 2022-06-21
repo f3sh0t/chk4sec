@@ -1,5 +1,4 @@
 #!/bin/bash
-
 export BASE_URL=http://localhost
 docker-compose up -d --build
 docker-compose run back migrate
