@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-
+import logging
 from apps.requirement.models import Category, Requirement, ExportRequest
 
 __all__ = ["CreateRequestExportSerializer", "ExportRequestRetrieveSerializer"]
@@ -10,7 +10,7 @@ __all__ = ["CreateRequestExportSerializer", "ExportRequestRetrieveSerializer"]
 class CreateExportOneCategorySerializer(serializers.Serializer):
     category_id = serializers.PrimaryKeyRelatedField(required=True, queryset=Category.objects.all())
     requirements_ids = serializers.PrimaryKeyRelatedField(many=True, queryset=Requirement.objects.all())
-
+    passed_requirements_ids = serializers.PrimaryKeyRelatedField(many=True, queryset=Requirement.objects.all())
 
 class CreateRequestExportSerializer(serializers.Serializer):
     data = CreateExportOneCategorySerializer(many=True, required=True)
@@ -36,7 +36,10 @@ class CreateRequestExportSerializer(serializers.Serializer):
             requirements_ids = []
             for requirement in cat_data["requirements_ids"]:
                 requirements_ids.append(requirement.pk)
-            actual_data.append({"category_id": cat_data["category_id"].id, "requirements_ids": requirements_ids})
+            passed_requirements_ids = []
+            for passed_requirement in cat_data["passed_requirements_ids"]:
+                passed_requirements_ids.append(passed_requirement.pk)
+            actual_data.append({"category_id": cat_data["category_id"].id, "requirements_ids": requirements_ids, "passed_requirements_ids": passed_requirements_ids})
 
         if default_data:
             for actual_req in actual_data:
@@ -52,7 +55,7 @@ class CreateRequestExportSerializer(serializers.Serializer):
                         count += 1
                 if count == 0:
                     actual_data.insert(0, default_req)
-
+        # logging.warning('actual data = ' + str(actual_data))
         return ExportRequest.objects.create(
             status=ExportRequest.STATUS.CREATED, data=actual_data, language=validated_data["language"]
         )

@@ -38,11 +38,12 @@ def generate_pdf(uuid: str) -> None:
                 continue
 
             requirements_ids = cat_data.get("requirements_ids", [])
+            passed_requirements_ids = cat_data.get("passed_requirements_ids", [])
             categories.append(
                 {
                     "category": category,
                     "requirements": Requirement.objects.filter(id__in=requirements_ids),
-                    "selected_ids": [],
+                    "selected_ids": passed_requirements_ids,
                 }
             )
 
